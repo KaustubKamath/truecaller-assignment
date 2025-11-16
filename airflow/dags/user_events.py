@@ -5,11 +5,11 @@ from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.sensors.filesystem import FileSensor
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.models.param import Param
 
 
-# default arguments for all tasks
+# Default arguments for all tasks
 DEFAULT_ARGS = {
-    "owner": "Kaustub",
     "depends_on_past": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
@@ -24,6 +24,14 @@ with DAG(
     start_date=datetime(2025, 1, 1),
     catchup=False,
     max_active_runs=1,
+    params={
+        "output_format": Param(
+            default="json",
+            type="string",
+            enum=["json", "csv", "parquet"],
+            description="Output format for the job (accepted: json, csv, parquet)",
+        ),
+    },
 ) as dag:
 
     # Task 1: Start of DAG
@@ -35,39 +43,36 @@ with DAG(
     # Task 2: Check for data availability
     check_input_data = FileSensor(
         task_id="check_input_data_available",
-        filepath="/opt/airflow/data/sample_input.csv",
+        filepath="/opt/airflow/data/input/sample_input.csv",
         timeout=3600, 
         poke_interval=60, 
-        mode = "poke",
-        fs_conn_id = "local_file_path",
-        soft_fail = False,
-        dag = dag,
+        mode="poke",
+        fs_conn_id="fs_default",
+        soft_fail=False,
+        dag=dag,
     )
 
     # Task 3: Run Spark transformations
     run_spark_job = SparkSubmitOperator(
         task_id="run_spark_job",
-        application="/opt/airflow/dags/dags_spark/src/jobs/user_settings_aggregator.py",
-        name="spark_submit_test",
-        conn_id="spark_local",   # do not use spark_default (which had master=yarn)
+        application="/opt/airflow/dags/src/jobs/user_settings_aggregator.py",
+        name="user_settings_etl",
+        conn_id="spark_default",
         application_args=[
-            "--input-path", "/opt/airflow/data/sample_input.csv",
+            "--input-path", "/opt/airflow/data/input/sample_input.csv",
             "--input-format", "csv",
-            "--partition-column", "id", #need to implement
-            "--output-path", "/opt/airflow/data/outputs",
-            "--output-format", "json",
-            ],
-            
+            "--partition-column", "id",
+            "--output-path", "/opt/airflow/data/output/{{ ds_nodash }}",
+            "--output-format", "{{ params.output_format }}",
+        ],
         conf={
             "spark.master": "local[*]",
-            "spark.executor.memory": "8g",
-            "spark.executor.cores": "4",
-            "spark.executor.instances": "10", 
-            "spark.driver.memory": "4g",
+            "spark.executor.memory": "1g",
+            "spark.driver.memory": "1g",
             "spark.sql.shuffle.partitions": "200",
-            },
+        },
         verbose=True,
-        dag = dag,
+        dag=dag,
     )
 
     # Task 4: Send success notification

@@ -29,20 +29,9 @@ class UserSettings:
         self.spark = spark
         self.transformer = UserSettingsTransformer()
     
+    # Reads input data from the specified path.
     def read_input_data(self, input_path: str, file_format: str ="csv") -> DataFrame:
-        """
-        Reads input data from the specified path.
 
-        Args:
-            input_path: Path to the input data.
-            file_format: Format of input file.
-
-        Returns:
-            DataFrame containing user events.
-
-        Raises:
-            Exception: If the data cannot be read.
-        """
         logger.info(f"Reading input data from {input_path} (format :{file_format}).")
 
         try:
@@ -61,20 +50,9 @@ class UserSettings:
             logger.error(f"Failed to read input data: {str(e)}.")
             raise
     
+    # Write output data to the specified path.
     def write_output_data(self, df: DataFrame, output_path: str, partition_column: str, file_format: str = "csv", mode: str = "overwrite",) -> None:
-        """
-        Write output data to the specified path.
 
-        Args:
-            df: DataFrame to write.
-            output_path: Destination path to write the output data.
-            partition_column: Column to parititon by.
-            file_format: Output file format.
-            mode: Write mode (Overwrite, append).
-
-        Raises:
-            Exception: If the data cannot be written.
-        """
         logger.info(f"Writing output data to {output_path}(format: {file_format}).")
 
         try:
@@ -98,7 +76,6 @@ class UserSettings:
                 writer = df_csv.write.mode(mode)
                 writer.option("header", "true").csv(output_path)
             elif file_format == "json":
-                df
                 writer.json(output_path)
             elif file_format == "parquet":
                 writer.parquet(output_path)
@@ -120,15 +97,6 @@ class UserSettings:
         input_format: str = "csv",
         output_format: str = "csv",
         )-> None:
-
-        """
-        Args:
-            input_path: Path to input data.
-            output_path: Path to write output data.
-            partition_column: Column to parition by.
-            input_format: Format of input file.
-            output_format: Format of output file.
-        """
 
         logger.info("=" * 10)
         logger.info(f"Input file path: {input_path}.")
@@ -161,14 +129,8 @@ class UserSettings:
             logger.info("!" * 20)
             raise    
 
-
+# Parse the passed arguments.
 def parse_arguments():
-    """
-    Parse the passed arguments.
-
-    Returns:
-        Parsed arguments.
-    """
 
     parser=argparse.ArgumentParser()
 
@@ -202,10 +164,6 @@ def parse_arguments():
     return parser.parse_args()
 
 def main() -> int:
-    """
-    Returns:
-        Exit code
-    """
 
     args = parse_arguments()
 
