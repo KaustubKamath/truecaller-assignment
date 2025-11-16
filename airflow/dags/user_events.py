@@ -67,7 +67,7 @@ with DAG(
         ],
         conf={
             "spark.master": "local[*]",
-            "spark.executor.memory": "2g",
+            "spark.executor.memory": "1g",
             "spark.driver.memory": "1g",
             "spark.sql.shuffle.partitions": "200",
         },
