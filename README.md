@@ -25,7 +25,8 @@ truecaller-assignment/
 
 See `QUICKSTART.md` for minimal steps. Summary:
 
-```bash
+```
+bash
 # 1) Setup
 ./setup.sh        # Linux/Mac
 # or
@@ -40,7 +41,7 @@ docker-compose up -d
 
 In Airflow, open `user_settings_etl_daily`, unpause, and Trigger. Choose an Output format (json, csv, parquet) from the dropdown. Output files land under `data/output/<YYYYMMDD>/`.
 
-6. **Check output:**
+**Check output:**
    ```bash
    ls -la data/output/
    ```
