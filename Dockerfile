@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Set Java environment (Java 17 is default in Debian Bookworm)
+# Set Java environment
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV PATH=$PATH:$JAVA_HOME/bin
 
@@ -19,7 +19,7 @@ ENV SPARK_HOME=/opt/spark
 ENV SPARK_URL="https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
 ENV SPARK_MIRROR_URL="https://mirrors.huaweicloud.com/apache/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
 
-# Download Spark with retry logic - try Apache archive first, fallback to Huawei mirror
+# Download Spark
 RUN cd /tmp && \
     (curl -fL "${SPARK_URL}" -o spark.tgz || curl -fL "${SPARK_MIRROR_URL}" -o spark.tgz) && \
     tar -xz -f spark.tgz -C /opt && \

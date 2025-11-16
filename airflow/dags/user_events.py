@@ -5,11 +5,11 @@ from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.sensors.filesystem import FileSensor
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.models.param import Param
 
 
-# default arguments for all tasks
+# Default arguments for all tasks
 DEFAULT_ARGS = {
-    "owner": "Kaustub",
     "depends_on_past": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
@@ -24,6 +24,14 @@ with DAG(
     start_date=datetime(2025, 1, 1),
     catchup=False,
     max_active_runs=1,
+    params={
+        "output_format": Param(
+            default="json",
+            type="string",
+            enum=["json", "csv", "parquet"],
+            description="Output format for the job (accepted: json, csv, parquet)",
+        ),
+    },
 ) as dag:
 
     # Task 1: Start of DAG
@@ -54,8 +62,8 @@ with DAG(
             "--input-path", "/opt/airflow/data/input/sample_input.csv",
             "--input-format", "csv",
             "--partition-column", "id",
-            "--output-path", "/opt/airflow/data/output",
-            "--output-format", "json",
+            "--output-path", "/opt/airflow/data/output/{{ ds_nodash }}",
+            "--output-format", "{{ params.output_format }}",
         ],
         conf={
             "spark.master": "local[*]",

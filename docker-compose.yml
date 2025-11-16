@@ -32,7 +32,6 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
-      # Optimize PostgreSQL memory usage
       POSTGRES_INITDB_ARGS: "-E UTF8"
     command: ["postgres", "-c", "shared_buffers=128MB", "-c", "effective_cache_size=512MB", "-c", "maintenance_work_mem=64MB", "-c", "work_mem=8MB"]
     volumes:
@@ -135,7 +134,6 @@ services:
       - "${AIRFLOW_WEBSERVER_PORT:-8081}:8080"
     environment:
       <<: *airflow-common-env
-      # Reduce Airflow worker memory
       AIRFLOW__WEBSERVER__WORKERS: "2"
       AIRFLOW__WEBSERVER__WORKER_REFRESH_INTERVAL: "1800"
       AIRFLOW__WEBSERVER__WORKER_TIMEOUT: "120"
@@ -163,7 +161,6 @@ services:
     command: scheduler
     environment:
       <<: *airflow-common-env
-      # Reduce scheduler memory usage
       AIRFLOW__SCHEDULER__PARSING_PROCESSES: "2"
       AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "300"
     healthcheck:

@@ -1,8 +1,3 @@
-"""
-settings transformer - Contains logic for transforming user events ddata into aggregated
-settings maps, keeping only the most recent value for each setting per user. 
-"""
-
 # Imports
 import logging 
 from typing import Any, List, Set
@@ -34,17 +29,9 @@ class UserSettingsTransformer:
     def __init__(self):
         self.input_columns = ["id", "name", "value", "timestamp"]
     
-
+    # Column and data type validation
     def validate_input_schema(self, df: DataFrame) -> None:
-        """
-        Column and data type validation
 
-        Args: 
-            df: Input DataFrame
-        
-        Raises:
-            ValueError: If the required columns are missing or if any of the columns have incorrect data types.
-        """ 
         logger.info("Input schema validation started.")
 
         # Validate for required columns
@@ -73,16 +60,8 @@ class UserSettingsTransformer:
        
         logger.info("Input schema validation passed.")
    
+   # Deduplication to keep only the record with the latest timestamp for each id, name pair.
     def deduplicate_by_latest_timestamp(self, df: DataFrame) -> DataFrame:
-        """
-        Deduplication to keep only the record with the latest timestamp for each id, name pair.
-
-        Args: 
-            df: Input DataFrame.
-        
-        Returns:
-            DataFrame with deduplicated records.
-        """
 
         logger.info("Deduplication process start.") 
 
@@ -101,16 +80,9 @@ class UserSettingsTransformer:
 
         return deduplicated_df
     
+    # Aggregate names and values into a Map for each user.
     def aggregate_to_map(self, df: DataFrame) -> DataFrame:
-        """
-        Aggregate names and values into a Map for each user.
 
-        Args:
-            df: Deduplicated DataFrame.
-
-        Returns:
-            Output DataFrame
-        """
         logger.info("Aggregation process start.")
 
         output_df = df.groupBy("id").agg(
@@ -129,18 +101,7 @@ class UserSettingsTransformer:
         return output_df
 
     
-    # Entry point
     def transform(self, df: DataFrame) -> DataFrame:
-        """
-        Args:
-            df: Input DataFrame.
-        
-        Returns:
-            Transformed dataframe with aggregated settings.
-        
-        Raise:
-            ValueError: If input DataFrame schema is invalid.
-        """
 
         logger.info("Starting user settings transformation.")
 
@@ -158,13 +119,6 @@ class UserSettingsTransformer:
         return output_df
 
 def transform_user_settings(df: DataFrame) -> DataFrame:
-    """
-    Args:
-        df: Input DataFrame.
-    
-    Returns:
-        Transformed DataFrame with aggregated settings.
-    """
 
     transformer = UserSettingsTransformer()
     return transformer.transform(df)
