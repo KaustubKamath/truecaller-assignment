@@ -4,6 +4,8 @@ from pathlib import Path
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.sensors.filesystem import FileSensor
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+
 
 # default arguments for all tasks
 DEFAULT_ARGS = {
@@ -42,6 +44,32 @@ with DAG(
         dag = dag,
     )
 
+    # Task 3: Run Spark transformations
+    run_spark_job = SparkSubmitOperator(
+        task_id="run_spark_job",
+        application="/opt/airflow/dags/dags_spark/src/jobs/user_settings_aggregator.py",
+        name="spark_submit_test",
+        conn_id="spark_local",   # do not use spark_default (which had master=yarn)
+        application_args=[
+            "--input-path", "/opt/airflow/data/sample_input.csv",
+            "--input-format", "csv",
+            "--partition-column", "id", #need to implement
+            "--output-path", "/opt/airflow/data/outputs",
+            "--output-format", "json",
+            ],
+            
+        conf={
+            "spark.master": "local[*]",
+            "spark.executor.memory": "8g",
+            "spark.executor.cores": "4",
+            "spark.executor.instances": "10", 
+            "spark.driver.memory": "4g",
+            "spark.sql.shuffle.partitions": "200",
+            },
+        verbose=True,
+        dag = dag,
+    )
+
     # Task 4: Send success notification
     send_success_notification = EmptyOperator(
         task_id = "send_success_notification",
@@ -58,6 +86,7 @@ with DAG(
     (
         start
         >> check_input_data
+        >> run_spark_job
         >> send_success_notification
         >> end
     )
