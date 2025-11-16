@@ -1,0 +1,5 @@
+apache-airflow==2.8.0
+apache-airflow-providers-apache-spark
+pyspark==3.5.0
+pytest>=7.0.0
+

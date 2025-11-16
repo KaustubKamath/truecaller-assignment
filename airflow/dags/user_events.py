@@ -35,39 +35,36 @@ with DAG(
     # Task 2: Check for data availability
     check_input_data = FileSensor(
         task_id="check_input_data_available",
-        filepath="/opt/airflow/data/sample_input.csv",
+        filepath="/opt/airflow/data/input/sample_input.csv",
         timeout=3600, 
         poke_interval=60, 
-        mode = "poke",
-        fs_conn_id = "local_file_path",
-        soft_fail = False,
-        dag = dag,
+        mode="poke",
+        fs_conn_id="fs_default",
+        soft_fail=False,
+        dag=dag,
     )
 
     # Task 3: Run Spark transformations
     run_spark_job = SparkSubmitOperator(
         task_id="run_spark_job",
-        application="/opt/airflow/dags/dags_spark/src/jobs/user_settings_aggregator.py",
-        name="spark_submit_test",
-        conn_id="spark_local",   # do not use spark_default (which had master=yarn)
+        application="/opt/airflow/dags/src/jobs/user_settings_aggregator.py",
+        name="user_settings_etl",
+        conn_id="spark_default",
         application_args=[
-            "--input-path", "/opt/airflow/data/sample_input.csv",
+            "--input-path", "/opt/airflow/data/input/sample_input.csv",
             "--input-format", "csv",
-            "--partition-column", "id", #need to implement
-            "--output-path", "/opt/airflow/data/outputs",
+            "--partition-column", "id",
+            "--output-path", "/opt/airflow/data/output",
             "--output-format", "json",
-            ],
-            
+        ],
         conf={
             "spark.master": "local[*]",
-            "spark.executor.memory": "8g",
-            "spark.executor.cores": "4",
-            "spark.executor.instances": "10", 
-            "spark.driver.memory": "4g",
+            "spark.executor.memory": "2g",
+            "spark.driver.memory": "1g",
             "spark.sql.shuffle.partitions": "200",
-            },
+        },
         verbose=True,
-        dag = dag,
+        dag=dag,
     )
 
     # Task 4: Send success notification
