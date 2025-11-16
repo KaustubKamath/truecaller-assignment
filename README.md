@@ -25,8 +25,7 @@ truecaller-assignment/
 
 See `QUICKSTART.md` for minimal steps. Summary:
 
-```
-bash
+```bash
 # 1) Setup
 ./setup.sh        # Linux/Mac
 # or
