@@ -23,7 +23,7 @@ truecaller-assignment/
 
 ## Quickstart (Docker)
 
-See `QUICKSTART.md` for minimal steps. Summary:
+Summary:
 
 ```bash
 # 1) Setup
